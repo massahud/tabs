@@ -1,0 +1,131 @@
+body {
+  height: 80vh;
+  overflow: scroll;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-top: 1.5em;
+}
+
+#container {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  flex: 1;
+}
+
+.arm {
+  --left: 3em;
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.lane {
+  flex: 1;
+  background-color:  color-mix(in srgb, sienna 80%, transparent);
+  background-clip: ;
+  max-height: 2.5em;
+  height: 2em;
+  position: relative;
+  display: flex;
+
+  flex-direction: row;
+  flex-grow: 1;
+  align-items: stretch;
+  align-self: stretch;
+}
+
+.string {
+  --string-number: 1;
+  z-index: 10;
+  position: relative;
+  top: 50%;
+  background: black;
+
+  height: 0px;
+  width: calc(100% + 5px);
+
+  border-bottom-color: color-mix(in srgb, black 80%, transparent);;
+  border-bottom-style: solid;
+  border-bottom-width: 3px; 
+
+}
+
+.string-note {
+  display: flexbox;
+  position: relative;
+
+  text-align: center;
+  min-width: 3em;
+  height: 100%;
+}
+
+.fret {
+  z-index: 12;
+  flex: 1;
+  min-width: 4em;
+  position: relative;
+
+  border-right: 5px ridge goldenrod;
+  flex-grow: 1;
+
+  background-color: transparent;
+}
+
+.fret:nth-child(2) {
+  border-left: 5px ridge goldenrod;
+}
+
+.fret:hover {
+  background-color: color-mix(in srgb, goldenrod 80%, transparent);
+}
+
+.fret:hover > .string {
+  z-index: 9;
+
+  background-color: transparent;
+}
+
+.marker {
+  display: inline-block;
+  overflow: visible;
+  position: absolute;
+  text-align: justify;
+  background-color: transparent;
+  padding-top: 1em;
+  color: transparent;
+  margin-left: 50%;
+  margin-right: 50%;
+  flex: 1;
+}
+
+
+
+.fret.active .marker {
+
+  color: black;
+  font-size: smaller;
+  margin: auto;
+  vertical-align: middle;
+}
+
+.fret.active .marker:before {
+  margin-left: 50%;
+  margin-right: 50%;
+  content: attr(data-note);
+}
+
+.fret.active .string {
+  opacity: 10%;
+}
+.lane:last-child .fret::after {
+  content: attr(data-number);
+  position: absolute;
+  margin-bottom: 3em;
+  top: calc(100% + 1em);
+  text-align: center;
+  margin-left: 50%;
+  margin-right: 50%;
+}
