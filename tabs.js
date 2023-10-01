@@ -19,14 +19,9 @@ arm.strings.forEach((string) => {
         byNote.push(fret.node);
         fretsByNote.set(fret.note, byNote);
 
-        // fret.node.addEventListener('click', (evt) => {
-        //     markFrets(evt);
-        //     return true;
-        // });
-
         fret.marker.addEventListener('click', (evt) => {
             markFrets(evt);
-            return true;
+            return false;
         });
 
         fret.fretString.node.addEventListener('click', (evt) => { return false;});

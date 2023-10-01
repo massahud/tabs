@@ -44,6 +44,7 @@ body {
   top: 50%;
   background: black;
 
+  width: 0px;
   height: 0px;
   width: calc(100% + 5px);
 
@@ -64,13 +65,9 @@ body {
 
 .fret {
   z-index: 12;
-  flex: 1;
   min-width: 4em;
   position: relative;
-
   border-right: 5px ridge goldenrod;
-  flex-grow: 1;
-
   background-color: transparent;
 }
 
@@ -89,32 +86,26 @@ body {
 }
 
 .marker {
-  display: flexbox;
-  /* overflow: visible; */
-  /* position: absolute; */
-  text-align: left;
+  display: block;
+  position: absolute;
+  text-align: center;
   background-color: transparent;
-  padding-top: 1em;
   color: transparent;
   width: 100%;
   height: 100%;
-  z-index: 1;
-  flex: 1;
+  z-index: 20;
+
 }
 
 
 
 .fret.active .marker {
-
   color: black;
-  font-size: smaller;
-  /* margin: auto; */
-  vertical-align: middle;
 }
 
 .fret.active .marker:before {
-  margin-left: 50%;
-  margin-right: 50%;
+  /* margin-left: 50%; */
+  /* margin-right: 50%; */
   content: attr(data-note);
 }
 
