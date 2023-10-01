@@ -1,7 +1,7 @@
 
 const nFrets = 22;
 const notes = ['E4', 'B3', 'G3', 'D3', 'A2', 'E2'];
-const noteOrder = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#','A', 'A#', 'B'];
 
 
 const container = document.querySelector('#container');
@@ -38,14 +38,13 @@ arm.lanes.forEach((lane) => {
     });
 });
 
-
 function noteToHue(note) {
     // distribute hue between 0 and 360 from notes E2 to D6
-    const e2 = 31;
-    const d6 = 77;
+    const e2 = noteOrder.indexOf('E') + 2*12;
+    const d6 = noteOrder.indexOf('D') + 6*12;
     const octave = parseInt(note[note.length - 1]);
     const notePos = noteOrder.indexOf(note.substring(0, note.length - 1));
-    return ((notePos + octave * 12) - 31) * 352 / (77 - 31);
+    return ((notePos + octave * 12) - e2) * 360 / (d6 - e2 + 1);
 }
 
 function markFrets(evt) {
