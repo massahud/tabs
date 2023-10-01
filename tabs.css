@@ -69,6 +69,7 @@ body {
   position: relative;
   border-right: 5px ridge goldenrod;
   background-color: transparent;
+  flex: 1
 }
 
 .fret:nth-child(2) {
