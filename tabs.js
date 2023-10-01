@@ -19,10 +19,10 @@ arm.strings.forEach((string) => {
         byNote.push(fret.node);
         fretsByNote.set(fret.note, byNote);
 
-        fret.node.addEventListener('click', (evt) => {
-            markFrets(evt);
-            return true;
-        });
+        // fret.node.addEventListener('click', (evt) => {
+        //     markFrets(evt);
+        //     return true;
+        // });
 
         fret.marker.addEventListener('click', (evt) => {
             markFrets(evt);
@@ -53,9 +53,6 @@ function noteToHue(note) {
     return ((notePos + octave * 12) - 31) * 352 / (77 - 31);
 }
 
-console.log(`e2: ${noteToHue('E2')}`);
-console.log(`d6: ${noteToHue('D6')}`);
-console.log(`d5: ${noteToHue('C#6')}`);
 function markFrets(evt) {
     const hue = noteToHue(evt.target.dataset.note);
     const nextColor = `hsl(${hue}, 100%, 75%)`;
