@@ -1,22 +1,16 @@
 body {
-  height: 80vh;
   overflow: scroll;
-  display: flex;
-  flex-direction: column;
   position: relative;
-  padding-top: 1.5em;
+  padding-top: 1.5em; 
 }
 
 #container {
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  flex: 1;
+  display: grid;
+  grid-auto-flow: column;
+  margin-bottom: 4em;
 }
 
 .arm {
-  --left: 3em;
-  flex: 1;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -25,11 +19,11 @@ body {
 .lane {
   flex: 1;
   background-color:  color-mix(in srgb, sienna 80%, transparent);
-  background-clip: ;
-  max-height: 2.5em;
-  height: 2em;
+
   position: relative;
   display: flex;
+
+  min-height: 5vmax;
 
   flex-direction: row;
   flex-grow: 1;
@@ -50,7 +44,7 @@ body {
 
   border-bottom-color: color-mix(in srgb, black 80%, transparent);;
   border-bottom-style: solid;
-  border-bottom-width: 3px; 
+  border-bottom-width: calc(calc(var(--string-number) * 0.5px) + 0.5px); 
 
 }
 
@@ -67,6 +61,7 @@ body {
   z-index: 12;
   min-width: 4em;
   position: relative;
+  
   border-right: 5px ridge goldenrod;
   background-color: transparent;
   flex: 1
@@ -115,7 +110,7 @@ body {
 }
 .lane:last-child .fret::after {
   content: attr(data-number);
-  position: absolute;
+  position: relative;
   margin-bottom: 3em;
   top: calc(100% + 1em);
   text-align: center;
