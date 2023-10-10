@@ -14,6 +14,50 @@ const arm = createArm(nutPositions);
 
 const fretsByNote = new Map();
 
+// Note commands: toggle, activate, deactivate
+const COMMAND_TOGGLE = 'toggle';
+const COMMAND_ACTIVATE = 'activate';
+const COMMAND_DEACTIVATE = 'deactivate';
+
+window.addEventListener('load', (evt) => {
+    document.querySelector('#clear').addEventListener('click', (evt) => {
+        clearNotes();
+    });
+});
+
+class NoteEvent extends Event {
+    static TYPE = 'note';
+    constructor(note, command) {
+        super(NoteEvent.TYPE);
+        this.note = note;
+        this.command = command;
+    }
+}
+
+window.addEventListener(NoteEvent.TYPE, noteEventListener);
+
+window.addEventListener('popstate', (evt) => {
+    if (evt.state !== null) {
+        const notes = evt.state;
+        activeNotes.filter(note => !notes.includes(note)).forEach(note => {
+            window.dispatchEvent(new NoteEvent(note, COMMAND_DEACTIVATE));
+        });
+    }
+});
+
+window.addEventListener('hashchange', (evt) => {
+    if (history.state === null) {
+        loadHash();
+    } else {
+        history.state.filter(note => !activeNotes.includes(note)).forEach(note => {
+            window.dispatchEvent(new NoteEvent(note, COMMAND_ACTIVATE));
+        });
+        activeNotes.filter(note => !history.state.includes(note)).forEach(note => {
+            window.dispatchEvent(new NoteEvent(note, COMMAND_DEACTIVATE));
+        });
+    }
+});
+
 arm.strings.forEach((string) => {
     string.frets.forEach((fret) => {
 
@@ -22,8 +66,7 @@ arm.strings.forEach((string) => {
         fretsByNote.set(fret.note, byNote);
 
         fret.marker.addEventListener('click', (evt) => {
-            markFrets(evt.target);
-            return false;
+            window.dispatchEvent(new NoteEvent(evt.target.dataset.note, COMMAND_TOGGLE));
         });
 
         fret.fretString.node.addEventListener('click', (evt) => { return false; });
@@ -36,7 +79,7 @@ arm.lanes.forEach((lane) => {
     fretsByNote.set(lane.stringNote.dataset.note, byNote);
 
     lane.stringNote.addEventListener('click', (evt) => {
-        markFrets(evt.target);
+        window.dispatchEvent(new NoteEvent(evt.target.dataset.note, COMMAND_TOGGLE));
     });
 });
 
@@ -51,21 +94,11 @@ function noteToHue(note) {
     return ((notePos + octave * 12) - e2) * 360 / (d6 - e2 + 1);
 }
 
-function markFrets(target) {
-    const hue = noteToHue(target.dataset.note);
+function toggleNote(note) {
+    const hue = noteToHue(note);
     const nextColor = `hsl(${hue}, 100%, 75%)`;
-    if (activeNotes.includes(target.dataset.note)) {
-        activeNotes.splice(activeNotes.indexOf(target.dataset.note), 1);
-    } else {
-        activeNotes.push(target.dataset.note);
-    }
-    activeNotes.sort((a, b) => {
-        const aPos = noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
-        const bPos = noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
-        return aPos - bPos;
-    });
-    window.location.hash = activeNotes.join(',');
-    fretsByNote.get(target.dataset.note).forEach(e => {
+    
+    fretsByNote.get(note).forEach(e => {
         e.classList.toggle('active');
         // set a random background color;
         if (e.classList.contains('active')) {
@@ -99,9 +132,6 @@ function createArm(nutPositions) {
 
         arm.appendChild(lane.node);
     }
-
-    // const markers = createLane('', '');
-    // arm.appendChild(markers);
 
     return { node: arm, strings: strings, lanes: lanes };
 }
@@ -185,10 +215,63 @@ function calculateNuts(nFrets) {
 
 function loadHash() {
     const hash = window.location.hash;
+    console.log(activeNotes);
+    activeNotes.forEach(toggleNote);
+    activeNotes.splice(0, activeNotes.length);
     if (hash) {
         const notes = hash.substring(1).split(',');
-        notes.forEach(note => {
-            markFrets(document.querySelector(`.note[data-note="${note}"]`));
-        });
+        notes.forEach(toggleNote);
+        activeNotes.push(...notes);
+        activeNotes.sort(noteComparator);
     }
 }
+
+function clearNotes() {
+    console.log('clear');
+    activeNotes.forEach(toggleNote);
+    activeNotes.splice(0, activeNotes.length);
+    window.location.hash = '';
+}
+
+function noteEventListener(evt) {
+    const note = evt.note;
+    console.log(evt);
+    switch (evt.command) {
+        case COMMAND_TOGGLE:
+            if (activeNotes.includes(note)) {
+                activeNotes.splice(activeNotes.indexOf(note), 1);
+            } else {
+                activeNotes.push(note);
+            }
+            toggleNote(note);
+            break;
+        case COMMAND_ACTIVATE:
+            if (!activeNotes.includes(note)) {
+                activeNotes.push(note);
+                toggleNote(note);
+            }
+            break;
+        case COMMAND_DEACTIVATE:
+            if (activeNotes.includes(note)) {
+                activeNotes.splice(activeNotes.indexOf(note), 1);
+                toggleNote(note);
+            }
+            break;
+    }
+
+    activeNotes.sort(noteComparator);
+
+    const state = activeNotes;
+    if (history.state == null || history.state.join(",") !== state.join(",")) {
+        history.pushState(state, '', '#' + activeNotes.join(','));
+    }
+}
+
+function noteComparator(a, b) {
+    
+    const aPos = noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
+    const bPos = noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
+    return aPos - bPos;
+
+}
+
