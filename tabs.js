@@ -1,8 +1,10 @@
 
+
 const nFrets = 22;
 const notes = ['E4', 'B3', 'G3', 'D3', 'A2', 'E2'];
-const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#','A', 'A#', 'B'];
+const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+const activeNotes = [];
 
 const container = document.querySelector('#container');
 
@@ -20,11 +22,11 @@ arm.strings.forEach((string) => {
         fretsByNote.set(fret.note, byNote);
 
         fret.marker.addEventListener('click', (evt) => {
-            markFrets(evt);
+            markFrets(evt.target);
             return false;
         });
 
-        fret.fretString.node.addEventListener('click', (evt) => { return false;});
+        fret.fretString.node.addEventListener('click', (evt) => { return false; });
     });
 });
 
@@ -34,23 +36,36 @@ arm.lanes.forEach((lane) => {
     fretsByNote.set(lane.stringNote.dataset.note, byNote);
 
     lane.stringNote.addEventListener('click', (evt) => {
-        markFrets(evt);
+        markFrets(evt.target);
     });
 });
 
+loadHash();
+
 function noteToHue(note) {
     // distribute hue between 0 and 360 from notes E2 to D6
-    const e2 = noteOrder.indexOf('E') + 2*12;
-    const d6 = noteOrder.indexOf('D') + 6*12;
+    const e2 = noteOrder.indexOf('E') + 2 * 12;
+    const d6 = noteOrder.indexOf('D') + 6 * 12;
     const octave = parseInt(note[note.length - 1]);
     const notePos = noteOrder.indexOf(note.substring(0, note.length - 1));
     return ((notePos + octave * 12) - e2) * 360 / (d6 - e2 + 1);
 }
 
-function markFrets(evt) {
-    const hue = noteToHue(evt.target.dataset.note);
+function markFrets(target) {
+    const hue = noteToHue(target.dataset.note);
     const nextColor = `hsl(${hue}, 100%, 75%)`;
-    fretsByNote.get(evt.target.dataset.note).forEach(e => {
+    if (activeNotes.includes(target.dataset.note)) {
+        activeNotes.splice(activeNotes.indexOf(target.dataset.note), 1);
+    } else {
+        activeNotes.push(target.dataset.note);
+    }
+    activeNotes.sort((a, b) => {
+        const aPos = noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
+        const bPos = noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
+        return aPos - bPos;
+    });
+    window.location.hash = activeNotes.join(',');
+    fretsByNote.get(target.dataset.note).forEach(e => {
         e.classList.toggle('active');
         // set a random background color;
         if (e.classList.contains('active')) {
@@ -99,12 +114,13 @@ function createLane(pureNote, noteScale) {
     lane.dataset.note = pureNote + noteScale;
 
     const stringNote = document.createElement('div');
-    stringNote.className = 'string-note';
+    stringNote.classList.add('string-note');
+    stringNote.classList.add('note');
     stringNote.dataset.note = pureNote + noteScale;
     stringNote.innerHTML = pureNote + noteScale;
     lane.appendChild(stringNote);
 
-    return {node: lane, stringNote: stringNote};
+    return { node: lane, stringNote: stringNote };
 }
 
 function createString(i, fret) {
@@ -126,7 +142,8 @@ function createFrets(i, pureNote, noteScale, lane, nutPositions) {
     for (let j = 1; j <= nFrets; j++) {
 
         const fret = document.createElement('div');
-        fret.className = 'fret';
+        fret.classList.add('fret');
+        fret.classList.add('note');
         fret.dataset.string = i;
         fret.dataset.fret = j;
         fret.dataset.pureNote = pureNote;
@@ -164,4 +181,14 @@ function calculateNuts(nFrets) {
         nutToFret[i] *= mult;
     });
     return nutToFret;
+}
+
+function loadHash() {
+    const hash = window.location.hash;
+    if (hash) {
+        const notes = hash.substring(1).split(',');
+        notes.forEach(note => {
+            markFrets(document.querySelector(`.note[data-note="${note}"]`));
+        });
+    }
 }
