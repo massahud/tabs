@@ -1,0 +1,103 @@
+:root {
+  --arm-color: sienna;
+  --string-color: rgba(192,192,192,0.8);
+  --fret-color: goldenrod;
+  --mark-color: color-mix(in srgb, ivory 80%, transparent);
+}
+
+
+body {
+  overflow: scroll;
+  position: relative;
+  padding-top: 1.5em; 
+}
+
+#container {
+  position: relative;
+}
+
+.arm {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(22, 1fr);
+  grid-auto-rows: minmax(2em, 3vmax);
+  background-color: var(--arm-color);
+}
+
+.fret {
+  display: block;
+  height: 100%;
+  z-index: 12;
+  /* min-width: 4em; */
+  min-width: 2vmax;
+  position: relative;
+  border: none;
+  border-right: 5px ridge var(--fret-color);
+  background-color: transparent;
+  background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px));  
+}
+
+.fret label {
+  color: #00000044;
+}
+
+.fret.active label {
+  color: black;
+}
+
+.fret:nth-child(25n - 24) {
+  border-right: 5px inset lightgray;
+
+}
+
+.fret:hover {
+  background-color: color-mix(in srgb, var(--fret-color) 80%, transparent);
+}
+
+.fret[data-string="2"] {
+  &[data-fret="3"], 
+  &[data-fret="5"],
+  &[data-fret="7"],
+  &[data-fret="9"],
+  &[data-fret="15"],
+  &[data-fret="17"],
+  &[data-fret="19"],
+  &[data-fret="21"] {
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-repeat: no-repeat;
+    background-position-y: top, 1.5vmax;
+  }
+}
+
+.fret[data-string="3"] {
+  &[data-fret="3"], 
+  &[data-fret="5"],
+  &[data-fret="7"],
+  &[data-fret="9"],
+  &[data-fret="15"],
+  &[data-fret="17"],
+  &[data-fret="19"],
+  &[data-fret="21"] {
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-repeat: no-repeat;
+    background-position-y: top, -1.5vmax;
+  }
+}
+
+.fret[data-string="0"], .fret[data-string="4"] {
+  &[data-fret="12"],
+  &[data-fret="24"] {
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-repeat: no-repeat;
+    background-position-y: top, 1.5vmax;
+  }
+}
+
+.fret[data-string="1"], .fret[data-string="5"] {
+  &[data-fret="12"],
+  &[data-fret="24"] {
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-repeat: no-repeat;
+    background-position-y: top, -1.5vmax;
+  }
+}
