@@ -66,6 +66,7 @@ arm.strings.forEach((string) => {
         fretsByNote.set(fret.note, byNote);
 
         fret.node.addEventListener('click', (evt) => {
+            evt.preventDefault();
             if (evt.target.dataset.note !== undefined) {
                 window.dispatchEvent(new NoteEvent(evt.target.dataset.note, COMMAND_TOGGLE));
             }
@@ -86,18 +87,22 @@ function noteToHue(note) {
     return ((notePos + octave * 12) - e2) * 360 / (d6 - e2 + 1);
 }
 
-function toggleNote(note) {
+function noteColor(note) {
     const hue = noteToHue(note);
-    const nextColor = `hsl(${hue}, 100%, 75%)`;
+    return `hsl(${hue}, 100%, 75%)`;
+}
+
+function toggleNote(note) {
+    
     
     fretsByNote.get(note).forEach(e => {
         e.classList.toggle('active');
         // set a random background color;
-        if (e.classList.contains('active')) {
-            e.style.backgroundColor = nextColor;
-        } else {
-            e.style.backgroundColor = 'transparent';
-        }
+        // if (e.classList.contains('active')) {
+        //     e.style.backgroundColor = nextColor;
+        // } else {
+        //     e.style.backgroundColor = 'transparent';
+        // }
     });
 }
 
@@ -145,13 +150,10 @@ function createFrets(i, pureNote, noteScale, arm, nutPositions) {
         fret.style.setProperty('--string-number', i);
         fret.style.setProperty('--fret-number', j);
         fret.style.setProperty('--fret-width', nutPositions[j+1] - nutPositions[j]);
+        fret.style.setProperty('--active-color', noteColor(fret.dataset.note));
         fret.id = `f${pureNote}${noteScale}-${fret.dataset.note}`;
+        fret.textContent = fret.dataset.note;
 
-        const label = document.createElement('label');
-        label.innerText = fret.dataset.note;
-        label.setAttribute('for', fret.id);
-
-        fret.appendChild(label);
     
         arm.appendChild(fret);
         frets.push({ node: fret, note: fret.dataset.note });

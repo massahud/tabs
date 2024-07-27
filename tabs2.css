@@ -8,19 +8,22 @@
 
 body {
   overflow: scroll;
-  position: relative;
-  padding-top: 1.5em; 
+  position: absolute;
+  width: calc(100% - 1em);
+  height: 90%;
 }
 
 #container {
   position: relative;
+  height: calc(100% - 2em);
+  /* width: 100%; */
 }
 
 .arm {
-  position: relative;
+  /* position: relative; */
   display: grid;
   grid-template-columns: repeat(22, 1fr);
-  grid-auto-rows: minmax(2em, 3vmax);
+  height: 100%;
   background-color: var(--arm-color);
 }
 
@@ -28,27 +31,29 @@ body {
   display: block;
   height: 100%;
   z-index: 12;
-  /* min-width: 4em; */
   min-width: 2vmax;
   position: relative;
   border: none;
   border-right: 5px ridge var(--fret-color);
   background-color: transparent;
   background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px));  
-}
-
-.fret label {
   color: #00000044;
 }
 
-.fret.active label {
-  color: black;
-}
-
-.fret:nth-child(25n - 24) {
+.fret[data-fret="0"] {
+  min-width: 4em;
+  /* background-color: black; */
+  color: ivory;
   border-right: 5px inset lightgray;
+} 
 
+.fret.active {
+  color: black;
+  background-color: var(--active-color);
 }
+
+
+
 
 .fret:hover {
   background-color: color-mix(in srgb, var(--fret-color) 80%, transparent);
@@ -63,9 +68,11 @@ body {
   &[data-fret="17"],
   &[data-fret="19"],
   &[data-fret="21"] {
-    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
+    radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
     background-repeat: no-repeat;
-    background-position-y: top, 1.5vmax;
+    background-position-y: top,6.5vh;
+    overflow-y: visible;
   }
 }
 
@@ -80,7 +87,7 @@ body {
   &[data-fret="21"] {
     background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
     background-repeat: no-repeat;
-    background-position-y: top, -1.5vmax;
+    background-position-y: top, -6.5vh;
   }
 }
 
@@ -89,7 +96,7 @@ body {
   &[data-fret="24"] {
     background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
     background-repeat: no-repeat;
-    background-position-y: top, 1.5vmax;
+    background-position-y: top, 6.5vh;
   }
 }
 
@@ -98,6 +105,6 @@ body {
   &[data-fret="24"] {
     background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
     background-repeat: no-repeat;
-    background-position-y: top, -1.5vmax;
+    background-position-y: top, -6.5vh;
   }
 }
