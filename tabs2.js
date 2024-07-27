@@ -100,9 +100,11 @@ function noteColor(note) {
 }
 
 function toggleNote(note) {
-    console.log(`Toggling note: ${note} ${isPure(note) ? 'pure' : 'not pure'}`);
+    console.log(`Toggling note(s): ${note}`);
     const frets = isPure(note) ? fretsByPureNote.get(note) : fretsByNote.get(note);
-    frets.forEach(e => {e.classList.toggle('active');});
+    if (frets !== undefined) {
+        frets.forEach(e => {e.classList.toggle('active');});
+    }
 }
 
 function createArm(nutPositions) {
