@@ -4,6 +4,7 @@ const nFrets = 24;
 const notes = ['E4', 'B3', 'G3', 'D3', 'A2', 'E2'];
 const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+
 const activeNotes = [];
 
 const container = document.querySelector('#container');
@@ -13,6 +14,7 @@ const nutPositions = calculateNuts(nFrets+1);
 const arm = createArm(nutPositions);
 
 const fretsByNote = new Map();
+const fretsByPureNote = new Map();
 
 // Note commands: toggle, activate, deactivate
 const COMMAND_TOGGLE = 'toggle';
@@ -65,6 +67,11 @@ arm.strings.forEach((string) => {
         byNote.push(fret.node);
         fretsByNote.set(fret.note, byNote);
 
+        console.log(fret.note, fret.pureNote);
+        const byPureNote = fretsByPureNote.get(fret.pureNote) ?? [];
+        byPureNote.push(fret.node);
+        fretsByPureNote.set(fret.pureNote, byPureNote);
+
         fret.node.addEventListener('click', (evt) => {
             evt.preventDefault();
             if (evt.target.dataset.note !== undefined) {
@@ -93,17 +100,9 @@ function noteColor(note) {
 }
 
 function toggleNote(note) {
-    
-    
-    fretsByNote.get(note).forEach(e => {
-        e.classList.toggle('active');
-        // set a random background color;
-        // if (e.classList.contains('active')) {
-        //     e.style.backgroundColor = nextColor;
-        // } else {
-        //     e.style.backgroundColor = 'transparent';
-        // }
-    });
+    console.log(`Toggling note: ${note} ${isPure(note) ? 'pure' : 'not pure'}`);
+    const frets = isPure(note) ? fretsByPureNote.get(note) : fretsByNote.get(note);
+    frets.forEach(e => {e.classList.toggle('active');});
 }
 
 function createArm(nutPositions) {
@@ -118,17 +117,17 @@ function createArm(nutPositions) {
 
     for (let i = 0; i < notes.length; i++) {
 
-        const pureNote = notes[i].substring(0, notes[i].length - 1);
-        const noteScale = parseInt(notes[i].substring(notes[i].length - 1));
+        const stringNote = notes[i].substring(0, notes[i].length - 1);
+        const stringScale = parseInt(notes[i].substring(notes[i].length - 1));
 
         
-        strings.push({ frets: createFrets(i, pureNote, noteScale, arm, nutPositions) });
+        strings.push({ frets: createFrets(i, stringNote, stringScale, arm, nutPositions) });
     }
 
     return { node: arm, strings: strings, lanes: lanes };
 }
 
-function createFrets(i, pureNote, noteScale, arm, nutPositions) {
+function createFrets(i, stringNote, stringScale, arm, nutPositions) {
     const frets = [];
     for (let j = 0; j <= nFrets; j++) {
 
@@ -138,25 +137,27 @@ function createFrets(i, pureNote, noteScale, arm, nutPositions) {
         fret.classList.add('note');
         fret.dataset.string = i;
         fret.dataset.fret = j;
-        fret.dataset.pureNote = pureNote;
-        fret.dataset.noteScale = noteScale;
+        fret.dataset.stringNote = stringNote;
+        fret.dataset.stringScale = stringScale;
 
         
 
-        const notePos = (noteOrder.indexOf(pureNote) + j);
+        const notePos = (noteOrder.indexOf(stringNote) + j);
         // ~~ is a bitwise NOT operator, it's a faster way to floor a POSITIVE number
-        fret.dataset.note = noteOrder[notePos % 12] + ~~(noteScale + notePos / 12);
+        fret.dataset.note = noteOrder[notePos % 12] + ~~(stringScale + notePos / 12);
+        console.log(stringNote, stringScale, j, fret.dataset.note, notePos);
         fret.dataset.number = j;
         fret.style.setProperty('--string-number', i);
         fret.style.setProperty('--fret-number', j);
         fret.style.setProperty('--fret-width', nutPositions[j+1] - nutPositions[j]);
         fret.style.setProperty('--active-color', noteColor(fret.dataset.note));
-        fret.id = `f${pureNote}${noteScale}-${fret.dataset.note}`;
+        fret.dataset.pureNote = fret.dataset.note.substring(0, fret.dataset.note.length - 1);
+        fret.id = `f${stringNote}${stringScale}-${fret.dataset.note}`;
         fret.textContent = fret.dataset.note;
 
     
         arm.appendChild(fret);
-        frets.push({ node: fret, note: fret.dataset.note });
+        frets.push({ node: fret, pureNote: fret.dataset.pureNote, note: fret.dataset.note });
     }
 
     return frets;
@@ -228,10 +229,11 @@ function noteEventListener(evt) {
 }
 
 function noteComparator(a, b) {
-    
-    const aPos = noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
-    const bPos = noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
+    const aPos = isPure(a) ? noteOrder.indexOf(a) : noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
+    const bPos = isPure(b) ? noteOrder.indexOf(b) : noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
     return aPos - bPos;
-
 }
 
+function isPure(note) {
+    return !(note[note.length - 1] >= '0' && note[note.length - 1] <= '9');
+}
