@@ -52,13 +52,6 @@ body {
   background-color: var(--active-color);
 }
 
-
-
-
-.fret:hover {
-  background-color: color-mix(in srgb, var(--fret-color) 80%, transparent);
-}
-
 .fret[data-string="2"] {
   &[data-fret="3"], 
   &[data-fret="5"],
