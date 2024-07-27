@@ -44,7 +44,7 @@ body {
   border-right: 5px ridge var(--fret-color);
   background-color: var(--arm-color);
   background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px));  
-  color: #00000044;
+  color: #00000066;
 }
 
 .fret[data-fret="0"] {

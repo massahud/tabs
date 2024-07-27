@@ -13,19 +13,14 @@ const nutPositions = calculateNuts(nFrets+1);
 
 const arm = createArm(nutPositions);
 
+
 const fretsByNote = new Map();
-const fretsByPureNote = new Map();
+const fretsByTonic = new Map();
 
 // Note commands: toggle, activate, deactivate
 const COMMAND_TOGGLE = 'toggle';
 const COMMAND_ACTIVATE = 'activate';
 const COMMAND_DEACTIVATE = 'deactivate';
-
-window.addEventListener('load', (evt) => {
-    document.querySelector('#clear').addEventListener('click', (evt) => {
-        clearNotes();
-    });
-});
 
 class NoteEvent extends Event {
     static TYPE = 'note';
@@ -67,10 +62,10 @@ arm.strings.forEach((string) => {
         byNote.push(fret.node);
         fretsByNote.set(fret.note, byNote);
 
-        console.log(fret.note, fret.pureNote);
-        const byPureNote = fretsByPureNote.get(fret.pureNote) ?? [];
-        byPureNote.push(fret.node);
-        fretsByPureNote.set(fret.pureNote, byPureNote);
+
+        const byTonic = fretsByTonic.get(fret.tonic) ?? [];
+        byTonic.push(fret.node);
+        fretsByTonic.set(fret.tonic, byTonic);
 
         fret.node.addEventListener('click', (evt) => {
             evt.preventDefault();
@@ -86,28 +81,32 @@ arm.strings.forEach((string) => {
 loadHash();
 
 function noteToHue(note) {
-    // distribute hue between 0 and 360 from notes E2 to D6
-    const e2 = noteOrder.indexOf('E') + 2 * 12;
-    const d6 = noteOrder.indexOf('D') + 6 * 12;
+
+    const mostTreble = noteFromString(notes[0].substring(0, notes[0].length - 1), parseInt(notes[0][notes[0].length - 1]), nFrets);
+    const mostBass = noteFromString(notes[notes.length - 1].substring(0, notes[notes.length - 1].length - 1), parseInt(notes[notes.length - 1][notes[notes.length - 1].length - 1]), 0);
+
+    // distribute hue between 0 and 360 based on the position of the note between the most treble and most bass notes
+    const treblePos = noteOrder.indexOf(mostTreble.tonic) + mostTreble.octave * 12;
+    const bassPos = noteOrder.indexOf(mostBass.tonic) + mostBass.octave * 12;
+
     const octave = parseInt(note[note.length - 1]);
     const notePos = noteOrder.indexOf(note.substring(0, note.length - 1));
-    return ((notePos + octave * 12) - e2) * 360 / (d6 - e2 + 1);
+    return ((notePos + octave * 12) - bassPos) * 360 / (treblePos - bassPos + 10); // +10 to avoid similar hues for the extreme notes
 }
 
 function noteColor(note) {
     const hue = noteToHue(note);
-    return `hsl(${hue}, 100%, 75%)`;
+    return `hsl(${hue}, 80%, 66%)`;
 }
 
 function toggleNote(note) {
-    console.log(`Toggling note(s): ${note}`);
-    const frets = isPure(note) ? fretsByPureNote.get(note) : fretsByNote.get(note);
+    const frets = isTonic(note) ? fretsByTonic.get(note) : fretsByNote.get(note);
     if (frets !== undefined) {
         frets.forEach(e => {e.classList.toggle('active');});
     }
 }
 
-function createArm(nutPositions) {
+function createArm() {
     const arm = document.createElement('div');
     arm.className = 'arm';
     // set the number of frets in the grid
@@ -115,15 +114,12 @@ function createArm(nutPositions) {
     container.appendChild(arm);
 
     const strings = [];
-    const lanes = [];
-
+    
     for (let i = 0; i < notes.length; i++) {
+        const stringTonic = notes[i].substring(0, notes[i].length - 1);
+        const stringOctave = parseInt(notes[i].substring(notes[i].length - 1));
 
-        const stringNote = notes[i].substring(0, notes[i].length - 1);
-        const stringScale = parseInt(notes[i].substring(notes[i].length - 1));
-
-        
-        strings.push({ frets: createFrets(i, stringNote, stringScale, arm, nutPositions) });
+        strings.push({ frets: createFrets(i, stringTonic, stringOctave, arm, nutPositions) });
     }
 
     for (let i = 0; i <= nFrets; i++) {
@@ -132,10 +128,11 @@ function createArm(nutPositions) {
         fretN.innerText = i;
     }
 
-    return { node: arm, strings: strings, lanes: lanes };
+    return { node: arm, strings: strings};
+   
 }
 
-function createFrets(i, stringNote, stringScale, arm, nutPositions) {
+function createFrets(i, stringTonic, stringOctave, arm, nutPositions) {
     const frets = [];
     for (let j = 0; j <= nFrets; j++) {
 
@@ -145,27 +142,28 @@ function createFrets(i, stringNote, stringScale, arm, nutPositions) {
         fret.classList.add('note');
         fret.dataset.string = i;
         fret.dataset.fret = j;
-        fret.dataset.stringNote = stringNote;
-        fret.dataset.stringScale = stringScale;
+        fret.dataset.stringTonic = stringTonic;
+        fret.dataset.stringOctave = stringOctave;
 
         
 
-        const notePos = (noteOrder.indexOf(stringNote) + j);
+        
         // ~~ is a bitwise NOT operator, it's a faster way to floor a POSITIVE number
-        fret.dataset.note = noteOrder[notePos % 12] + ~~(stringScale + notePos / 12);
-        console.log(stringNote, stringScale, j, fret.dataset.note, notePos);
+        const note = noteFromString(stringTonic, stringOctave, j);
+        fret.dataset.note = note.note;
+        fret.dataset.tonic = note.tonic;
+        fret.dataset.octave = note.octave;
         fret.dataset.number = j;
         fret.style.setProperty('--string-number', i);
         fret.style.setProperty('--fret-number', j);
         fret.style.setProperty('--fret-width', nutPositions[j+1] - nutPositions[j]);
         fret.style.setProperty('--active-color', noteColor(fret.dataset.note));
-        fret.dataset.pureNote = fret.dataset.note.substring(0, fret.dataset.note.length - 1);
-        fret.id = `f${stringNote}${stringScale}-${fret.dataset.note}`;
+        fret.id = `f${stringTonic}${stringOctave}-${fret.dataset.note}`;
         fret.textContent = fret.dataset.note;
 
     
         arm.appendChild(fret);
-        frets.push({ node: fret, pureNote: fret.dataset.pureNote, note: fret.dataset.note });
+        frets.push({ node: fret, tonic: fret.dataset.tonic, octave: fret.dataset.octave, note: fret.dataset.note });
     }
 
     return frets;
@@ -237,11 +235,22 @@ function noteEventListener(evt) {
 }
 
 function noteComparator(a, b) {
-    const aPos = isPure(a) ? noteOrder.indexOf(a) : noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
-    const bPos = isPure(b) ? noteOrder.indexOf(b) : noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
+    const aPos = isTonic(a) ? noteOrder.indexOf(a) : noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
+    const bPos = isTonic(b) ? noteOrder.indexOf(b) : noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
     return aPos - bPos;
 }
 
-function isPure(note) {
+function isTonic(note) {
     return !(note[note.length - 1] >= '0' && note[note.length - 1] <= '9');
+}
+
+function noteToIndex(note) {
+    return noteOrder.indexOf(note.substring(0, note.length - 1)) + parseInt(note[note.length - 1]) * 12;
+}
+
+function noteFromString(stringTonic, stringOctave, fretIndex) {
+    const notePos = (noteOrder.indexOf(stringTonic) + fretIndex);
+    const octave = ~~(stringOctave + notePos / 12)
+    const tonic = noteOrder[notePos % 12];
+    return { note: tonic + octave, tonic: tonic, octave: octave };
 }
