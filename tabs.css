@@ -1,123 +1,121 @@
+:root {
+  --arm-color: sienna;
+  --string-color: rgba(192,192,192,0.8);
+  --fret-color: goldenrod;
+  --mark-color: color-mix(in srgb, ivory 50%, transparent);
+}
+
+
 body {
+  margin: 0.5em !important;
+
   overflow: scroll;
-  position: relative;
-  padding-top: 1.5em; 
+  position: absolute;
+  width: calc(100vw - 1em);
+  height: calc(100vh - 1em);
+  max-height: 90vmin;
 }
 
 #container {
-  display: grid;
-  grid-auto-flow: column;
-  margin-bottom: 4em;
-  max-height: 90vmin;
-  min-height: 50vmin;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  max-height: 30em;
 }
 
 .arm {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.lane {
-  flex: 1;
-  background-color:  color-mix(in srgb, sienna 80%, transparent);
-
-  position: relative;
-  display: flex;
-
-  min-height: 6.18vmin;
-
-  flex-direction: row;
-  flex-grow: 1;
-  align-items: stretch;
-  align-self: stretch;
-}
-
-.string {
-  --string-number: 1;
-  z-index: 10;
-  position: relative;
-  top: 50%;
-  background: black;
-
-  width: 0px;
-  height: 0px;
-  width: calc(100% + 5px);
-
-  border-bottom-color: color-mix(in srgb, black 80%, transparent);;
-  border-bottom-style: solid;
-  border-bottom-width: calc(calc(var(--string-number) * 0.5px) + 0.5px); 
-
-}
-
-.string-note {
-  display: flexbox;
-  position: relative;
-
-  text-align: center;
-  min-width: 3em;
+  display: grid;
+  grid-template-columns: repeat(25, 1fr);
+  grid-template-rows: auto auto auto auto auto auto 2em;
   height: 100%;
+  width: 100%;
+  max-height: 30em;
+  grid-auto-columns: auto;
+  grid-auto-rows: auto;
 }
 
 .fret {
-  z-index: 12;
-  /* min-width: 4em; */
-  min-width: 2vmax;
-  aspect-ratio: 4/3;
-  position: relative;
-  
-  border-right: 5px ridge goldenrod;
-  background-color: transparent;
-  flex: 1
-}
-
-.fret:nth-child(2) {
-  border-left: 5px ridge goldenrod;
-}
-
-.fret:hover {
-  background-color: color-mix(in srgb, goldenrod 80%, transparent);
-}
-
-.fret:hover > .string {
-  z-index: 9;
-
-  background-color: transparent;
-}
-
-.marker {
   display: block;
-  position: absolute;
-  text-align: center;
-  background-color: transparent;
-  color: transparent;
-  width: 100%;
   height: 100%;
-  z-index: 20;
-
-}
-
-
-
-.fret.active .marker {
-  color: black;
-}
-
-.fret.active .marker:before {
-  /* margin-left: 50%; */
-  /* margin-right: 50%; */
-  content: attr(data-note);
-}
-
-.fret.active .string {
-  opacity: 10%;
-}
-.lane:last-child .fret::after {
-  content: attr(data-number);
+  z-index: 12;
+  min-width: 3.5em;
   position: relative;
-  margin-bottom: 3em;
-  top: calc(100% + 1em);
+  border: none;
+  border-right: 5px ridge var(--fret-color);
+  background-color: var(--arm-color);
+  background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px));  
+  color: #00000044;
+}
+
+.fret[data-fret="0"] {
+  background-color: black;
+  color: ivory;
+  border-right: 5px inset lightgray;
+} 
+
+.fret.active {
+  color: black;
+  background-color: var(--active-color);
+}
+
+.fret[data-string="2"] {
+  &[data-fret="3"], 
+  &[data-fret="5"],
+  &[data-fret="7"],
+  &[data-fret="9"],
+  &[data-fret="15"],
+  &[data-fret="17"],
+  &[data-fret="19"],
+  &[data-fret="21"] {
+    position: relative;
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
+                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-repeat: no-repeat, no-repeat;
+    background-size: 100% 100%, 50% 50%;
+    background-position: 0px 0px, 50% 150%;
+  }
+}
+
+.fret[data-string="3"] {
+  &[data-fret="3"], 
+  &[data-fret="5"],
+  &[data-fret="7"],
+  &[data-fret="9"],
+  &[data-fret="15"],
+  &[data-fret="17"],
+  &[data-fret="19"],
+  &[data-fret="21"] {
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
+                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-repeat: no-repeat, no-repeat;
+    background-size: 100% 100%, 50% 50%;
+    background-position: 0px 0px, 50% -50%;
+  }
+}
+
+.fret[data-string="0"], .fret[data-string="4"] {
+  &[data-fret="12"],
+  &[data-fret="24"] {
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
+                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-repeat: no-repeat, no-repeat;
+    background-size: 100% 100%, 50% 50%;
+    background-position: 0px 0px, 50% calc(100% + 50%);
+  }
+}
+
+.fret[data-string="1"], .fret[data-string="5"] {
+  &[data-fret="12"],
+  &[data-fret="24"] {
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-repeat: no-repeat, no-repeat;
+    background-size: 100% 100%, 50% 50%;
+    background-position: 0px 0px, 50% -50%;
+  }
+}
+
+.fret-number {
   text-align: center;
-  margin-left: 50%;
-  margin-right: 50%;
+  background-color: white;
+  padding-top: 0.5em;
 }

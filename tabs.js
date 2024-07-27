@@ -1,18 +1,20 @@
 
 
-const nFrets = 22;
+const nFrets = 24;
 const notes = ['E4', 'B3', 'G3', 'D3', 'A2', 'E2'];
 const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
 
 const activeNotes = [];
 
 const container = document.querySelector('#container');
 
-const nutPositions = calculateNuts(nFrets);
+const nutPositions = calculateNuts(nFrets+1);
 
 const arm = createArm(nutPositions);
 
 const fretsByNote = new Map();
+const fretsByPureNote = new Map();
 
 // Note commands: toggle, activate, deactivate
 const COMMAND_TOGGLE = 'toggle';
@@ -65,21 +67,19 @@ arm.strings.forEach((string) => {
         byNote.push(fret.node);
         fretsByNote.set(fret.note, byNote);
 
-        fret.marker.addEventListener('click', (evt) => {
-            window.dispatchEvent(new NoteEvent(evt.target.dataset.note, COMMAND_TOGGLE));
+        console.log(fret.note, fret.pureNote);
+        const byPureNote = fretsByPureNote.get(fret.pureNote) ?? [];
+        byPureNote.push(fret.node);
+        fretsByPureNote.set(fret.pureNote, byPureNote);
+
+        fret.node.addEventListener('click', (evt) => {
+            evt.preventDefault();
+            if (evt.target.dataset.note !== undefined) {
+                window.dispatchEvent(new NoteEvent(evt.target.dataset.note, COMMAND_TOGGLE));
+            }
         });
 
-        fret.fretString.node.addEventListener('click', (evt) => { return false; });
-    });
-});
-
-arm.lanes.forEach((lane) => {
-    const byNote = fretsByNote.get(lane.stringNote.dataset.note) ?? [];
-    byNote.push(lane.stringNote);
-    fretsByNote.set(lane.stringNote.dataset.note, byNote);
-
-    lane.stringNote.addEventListener('click', (evt) => {
-        window.dispatchEvent(new NoteEvent(evt.target.dataset.note, COMMAND_TOGGLE));
+        // fret.fretString.node.addEventListener('click', (evt) => { return false; });
     });
 });
 
@@ -94,26 +94,24 @@ function noteToHue(note) {
     return ((notePos + octave * 12) - e2) * 360 / (d6 - e2 + 1);
 }
 
-function toggleNote(note) {
+function noteColor(note) {
     const hue = noteToHue(note);
-    const nextColor = `hsl(${hue}, 100%, 75%)`;
-    
-    fretsByNote.get(note).forEach(e => {
-        e.classList.toggle('active');
-        // set a random background color;
-        if (e.classList.contains('active')) {
-            if (e.classList.contains('marker')) e.style.color = '#ffff00ff';
-            e.style.backgroundColor = nextColor;
-        } else {
-            if (e.classList.contains('marker')) e.style.color = 'transparent';
-            e.style.backgroundColor = 'transparent';
-        }
-    });
+    return `hsl(${hue}, 100%, 75%)`;
+}
+
+function toggleNote(note) {
+    console.log(`Toggling note(s): ${note}`);
+    const frets = isPure(note) ? fretsByPureNote.get(note) : fretsByNote.get(note);
+    if (frets !== undefined) {
+        frets.forEach(e => {e.classList.toggle('active');});
+    }
 }
 
 function createArm(nutPositions) {
     const arm = document.createElement('div');
     arm.className = 'arm';
+    // set the number of frets in the grid
+    arm.style.gridTemplateColumns = `repeat(${nFrets+1}, 1fr)`;
     container.appendChild(arm);
 
     const strings = [];
@@ -121,81 +119,53 @@ function createArm(nutPositions) {
 
     for (let i = 0; i < notes.length; i++) {
 
-        const pureNote = notes[i].substring(0, notes[i].length - 1);
-        const noteScale = parseInt(notes[i].substring(notes[i].length - 1));
+        const stringNote = notes[i].substring(0, notes[i].length - 1);
+        const stringScale = parseInt(notes[i].substring(notes[i].length - 1));
 
-        const lane = createLane(pureNote, noteScale);
+        
+        strings.push({ frets: createFrets(i, stringNote, stringScale, arm, nutPositions) });
+    }
 
-        lanes.push(lane);
-
-        strings.push({ frets: createFrets(i, pureNote, noteScale, lane.node, nutPositions) });
-
-        arm.appendChild(lane.node);
+    for (let i = 0; i <= nFrets; i++) {
+        const fretN = arm.appendChild(document.createElement('div'));
+        fretN.classList.add('fret-number');
+        fretN.innerText = i;
     }
 
     return { node: arm, strings: strings, lanes: lanes };
 }
 
-function createLane(pureNote, noteScale) {
-    const lane = document.createElement('div');
-    lane.className = 'lane';
-    lane.dataset.pureNote = pureNote;
-    lane.dataset.noteScale = noteScale;
-    lane.dataset.note = pureNote + noteScale;
-
-    const stringNote = document.createElement('div');
-    stringNote.classList.add('string-note');
-    stringNote.classList.add('note');
-    stringNote.dataset.note = pureNote + noteScale;
-    stringNote.innerHTML = pureNote + noteScale;
-    lane.appendChild(stringNote);
-
-    return { node: lane, stringNote: stringNote };
-}
-
-function createString(i, fret) {
-    const gstring = document.createElement('div');
-    gstring.className = 'string';
-    gstring.dataset.string = i;
-    gstring.dataset.note = fret.dataset.note;
-    gstring.style.setProperty('--string-number', i);
-
-    fret.appendChild(gstring);
-
-    return { node: gstring };
-}
-
-
-
-function createFrets(i, pureNote, noteScale, lane, nutPositions) {
+function createFrets(i, stringNote, stringScale, arm, nutPositions) {
     const frets = [];
-    for (let j = 1; j <= nFrets; j++) {
+    for (let j = 0; j <= nFrets; j++) {
 
-        const fret = document.createElement('div');
+        const fret = document.createElement('button');
+        
         fret.classList.add('fret');
         fret.classList.add('note');
         fret.dataset.string = i;
         fret.dataset.fret = j;
-        fret.dataset.pureNote = pureNote;
-        fret.dataset.noteScale = noteScale;
+        fret.dataset.stringNote = stringNote;
+        fret.dataset.stringScale = stringScale;
 
-        const notePos = (noteOrder.indexOf(pureNote) + j);
-        fret.dataset.note = noteOrder[notePos % 12] + ~~(noteScale + notePos / 12);
+        
+
+        const notePos = (noteOrder.indexOf(stringNote) + j);
+        // ~~ is a bitwise NOT operator, it's a faster way to floor a POSITIVE number
+        fret.dataset.note = noteOrder[notePos % 12] + ~~(stringScale + notePos / 12);
+        console.log(stringNote, stringScale, j, fret.dataset.note, notePos);
         fret.dataset.number = j;
         fret.style.setProperty('--string-number', i);
         fret.style.setProperty('--fret-number', j);
-        fret.style.setProperty('--fret-width', nutPositions[j] - nutPositions[j - 1]);
+        fret.style.setProperty('--fret-width', nutPositions[j+1] - nutPositions[j]);
+        fret.style.setProperty('--active-color', noteColor(fret.dataset.note));
+        fret.dataset.pureNote = fret.dataset.note.substring(0, fret.dataset.note.length - 1);
+        fret.id = `f${stringNote}${stringScale}-${fret.dataset.note}`;
+        fret.textContent = fret.dataset.note;
 
-        const fretString = createString(i, fret);
-
-        const marker = document.createElement('div');
-        marker.className = 'marker';
-        // marker.innerHTML = fret.dataset.note;
-        marker.dataset.note = fret.dataset.note;
-        fret.appendChild(marker);
-
-        lane.appendChild(fret);
-        frets.push({ node: fret, note: fret.dataset.note, fretString: fretString, marker: marker });
+    
+        arm.appendChild(fret);
+        frets.push({ node: fret, pureNote: fret.dataset.pureNote, note: fret.dataset.note });
     }
 
     return frets;
@@ -215,11 +185,11 @@ function calculateNuts(nFrets) {
 
 function loadHash() {
     const hash = window.location.hash;
-    console.log(activeNotes);
     activeNotes.forEach(toggleNote);
     activeNotes.splice(0, activeNotes.length);
     if (hash) {
         const notes = hash.substring(1).split(',');
+        console.log(`Loading notes: `, notes);
         notes.forEach(toggleNote);
         activeNotes.push(...notes);
         activeNotes.sort(noteComparator);
@@ -235,7 +205,6 @@ function clearNotes() {
 
 function noteEventListener(evt) {
     const note = evt.note;
-    console.log(evt);
     switch (evt.command) {
         case COMMAND_TOGGLE:
             if (activeNotes.includes(note)) {
@@ -268,10 +237,11 @@ function noteEventListener(evt) {
 }
 
 function noteComparator(a, b) {
-    
-    const aPos = noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
-    const bPos = noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
+    const aPos = isPure(a) ? noteOrder.indexOf(a) : noteOrder.indexOf(a.substring(0, a.length - 1)) + parseInt(a[a.length - 1]) * 12;
+    const bPos = isPure(b) ? noteOrder.indexOf(b) : noteOrder.indexOf(b.substring(0, b.length - 1)) + parseInt(b[b.length - 1]) * 12;
     return aPos - bPos;
-
 }
 
+function isPure(note) {
+    return !(note[note.length - 1] >= '0' && note[note.length - 1] <= '9');
+}
