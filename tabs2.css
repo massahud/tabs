@@ -2,7 +2,7 @@
   --arm-color: sienna;
   --string-color: rgba(192,192,192,0.8);
   --fret-color: goldenrod;
-  --mark-color: color-mix(in srgb, ivory 80%, transparent);
+  --mark-color: color-mix(in srgb, ivory 50%, transparent);
 }
 
 
@@ -16,6 +16,7 @@ body {
 #container {
   position: relative;
   height: calc(100% - 2em);
+  max-height: 30em;
   /* width: 100%; */
 }
 
