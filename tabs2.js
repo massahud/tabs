@@ -126,6 +126,12 @@ function createArm(nutPositions) {
         strings.push({ frets: createFrets(i, stringNote, stringScale, arm, nutPositions) });
     }
 
+    for (let i = 0; i <= nFrets; i++) {
+        const fretN = arm.appendChild(document.createElement('div'));
+        fretN.classList.add('fret-number');
+        fretN.innerText = i;
+    }
+
     return { node: arm, strings: strings, lanes: lanes };
 }
 

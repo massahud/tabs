@@ -20,26 +20,23 @@ body {
   height: 100%;
   width: 100%;
   max-height: 30em;
-  /* width: 100%; */
 }
 
 .arm {
-  /* position: relative; */
   display: grid;
   grid-template-columns: repeat(25, 1fr);
+  grid-template-rows: auto auto auto auto auto auto 2em;
   height: 100%;
   width: 100%;
   max-height: 30em;
   background-color: var(--arm-color);
-  grid-auto-columns: auto;
-  grid-auto-rows: auto;
 }
 
 .fret {
   display: block;
   height: 100%;
   z-index: 12;
-  min-width: 2vmax;
+  min-width: 4em;
   position: relative;
   border: none;
   border-right: 5px ridge var(--fret-color);
@@ -49,8 +46,7 @@ body {
 }
 
 .fret[data-fret="0"] {
-  /* min-width: 4rem; */
-  /* background-color: black; */
+  background-color: black;
   color: ivory;
   border-right: 5px inset lightgray;
 } 
@@ -71,7 +67,7 @@ body {
   &[data-fret="21"] {
     position: relative;
     background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
-    radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
     background-repeat: no-repeat, no-repeat;
     background-size: 100% 100%, 50% 50%;
     background-position: 0px 0px, 50% 150%;
@@ -87,7 +83,8 @@ body {
   &[data-fret="17"],
   &[data-fret="19"],
   &[data-fret="21"] {
-    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
+                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
     background-repeat: no-repeat, no-repeat;
     background-size: 100% 100%, 50% 50%;
     background-position: 0px 0px, 50% -50%;
@@ -97,10 +94,11 @@ body {
 .fret[data-string="0"], .fret[data-string="4"] {
   &[data-fret="12"],
   &[data-fret="24"] {
-    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
+    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
+                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
     background-repeat: no-repeat, no-repeat;
     background-size: 100% 100%, 50% 50%;
-    background-position: 0px 0px, 50% 150%;
+    background-position: 0px 0px, 50% calc(100% + 50%);
   }
 }
 
@@ -112,4 +110,10 @@ body {
     background-size: 100% 100%, 50% 50%;
     background-position: 0px 0px, 50% -50%;
   }
+}
+
+.fret-number {
+  text-align: center;
+  background-color: white;
+  padding-top: 0.5em;
 }
