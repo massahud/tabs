@@ -1,8 +1,10 @@
 :root {
   --arm-color: sienna;
-  --string-color: rgba(192,192,192,0.8);
-  --fret-color: goldenrod;
+  --string-color: silver;
+  --fret-color: gold;
   --mark-color: color-mix(in srgb, ivory 50%, transparent);
+  --fret-img: linear-gradient(90deg, transparent calc(100% - 6px), var(--fret-color) calc(100% - 4px),  var(--fret-color) 100%);
+  --mark-img: radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
 }
 
 
@@ -35,27 +37,32 @@ body {
 }
 
 .fret {
+  font-size: 8pt;
   display: block;
   height: 100%;
   z-index: 12;
-  min-width: 3.5em;
+  min-width: calc(3.5em + 2em - var(--fret-number)*0.5612em);
   position: relative;
   border: none;
-  border-right: 5px ridge var(--fret-color);
+
   background-color: var(--arm-color);
-  background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px));  
+  background-image: linear-gradient(0deg, transparent calc(50% - var(--string-number)*1px - 0.5px), var(--string-color) calc(50%), transparent calc(50% + var(--string-number)*1px + 0.5px)),
+                    linear-gradient(90deg, transparent calc(100% - 6px), var(--fret-color) calc(100% - 4px),  var(--fret-color) 100%); 
   color: #00000066;
+  padding-bottom: 2em;
 }
 
 .fret[data-fret="0"] {
   background-color: black;
   color: ivory;
-  border-right: 5px inset lightgray;
+  --fret-color: ivory;
+
 } 
 
 .fret.active {
   color: black;
   background-color: var(--active-color);
+  background-clip: padding-box;
 }
 
 .fret[data-string="2"] {
@@ -68,11 +75,11 @@ body {
   &[data-fret="19"],
   &[data-fret="21"] {
     position: relative;
-    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
-                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
-    background-repeat: no-repeat, no-repeat;
-    background-size: 100% 100%, 50% 50%;
-    background-position: 0px 0px, 50% 150%;
+    background-image: linear-gradient(0deg, transparent calc(50% - var(--string-number)*1px - 0.5px), var(--string-color) calc(50%), transparent calc(50% + var(--string-number)*1px + 0.5px)), 
+                      linear-gradient(90deg, transparent calc(100% - 6px), var(--fret-color) calc(100% - 4px),  var(--fret-color) 100%), var(--mark-img);
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-size: 100%, 100%, 50% 50%;
+    background-position: 100%, 100%, 50% 150%;
   }
 }
 
@@ -85,32 +92,33 @@ body {
   &[data-fret="17"],
   &[data-fret="19"],
   &[data-fret="21"] {
-    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
-                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
-    background-repeat: no-repeat, no-repeat;
-    background-size: 100% 100%, 50% 50%;
-    background-position: 0px 0px, 50% -50%;
+    background-image: linear-gradient(0deg, transparent calc(50% - var(--string-number)*1px - 0.5px), var(--string-color) calc(50%), transparent calc(50% + var(--string-number)*1px + 0.5px)), 
+                      linear-gradient(90deg, transparent calc(100% - 6px), var(--fret-color) calc(100% - 4px),  var(--fret-color) 100%), var(--mark-img);
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-size: 100%, 100%, 50% 50%;
+    background-position: 100%, 100%, 50% -50%;
   }
 }
 
 .fret[data-string="0"], .fret[data-string="4"] {
   &[data-fret="12"],
   &[data-fret="24"] {
-    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), 
-                      radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
-    background-repeat: no-repeat, no-repeat;
-    background-size: 100% 100%, 50% 50%;
-    background-position: 0px 0px, 50% calc(100% + 50%);
+    background-image: linear-gradient(0deg, transparent calc(50% - var(--string-number)*1px - 0.5px), var(--string-color) calc(50%), transparent calc(50% + var(--string-number)*1px + 0.5px)), 
+                      linear-gradient(90deg, transparent calc(100% - 6px), var(--fret-color) calc(100% - 4px),  var(--fret-color) 100%), var(--mark-img);
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-size: 100%, 100%, 50% 50%;
+    background-position: 100%, 100%, 50% calc(100% + 50%);
   }
 }
 
 .fret[data-string="1"], .fret[data-string="5"] {
   &[data-fret="12"],
   &[data-fret="24"] {
-    background-image: linear-gradient(0deg, transparent calc(50% - 1px), var(--string-color) calc(50%), transparent calc(50% + 1px)), radial-gradient(circle, var(--mark-color) 50%, transparent 50%);
-    background-repeat: no-repeat, no-repeat;
-    background-size: 100% 100%, 50% 50%;
-    background-position: 0px 0px, 50% -50%;
+    background-image: linear-gradient(0deg, transparent calc(50% - var(--string-number)*1px - 0.5px), var(--string-color) calc(50%), transparent calc(50% + var(--string-number)*1px + 0.5px)),
+                      linear-gradient(90deg, transparent calc(100% - 6px), var(--fret-color) calc(100% - 4px),  var(--fret-color) 100%), var(--mark-img);
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-size: 100%, 100%, 50% 50%;
+    background-position: 100%, 100%, 50% -50%;
   }
 }
 
@@ -118,4 +126,8 @@ body {
   text-align: center;
   background-color: white;
   padding-top: 0.5em;
+}
+
+.fret:hover {
+  --string-color: rgb(60, 255, 66);
 }
